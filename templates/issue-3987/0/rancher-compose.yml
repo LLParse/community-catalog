@@ -1,0 +1,14 @@
+.catalog:
+  name: "Issue 3987"
+  version: "0.1"
+  description: "Testing Issue 3987"
+  minimum_rancher_version: v1.0.0-rc2
+  questions:
+    - variable: "scale"
+      label: "Number of Tests"
+      description: "Number of tests to run"
+      required: true
+      default: 1
+      type: "int"
+linked:
+  scale: "${scale}"
