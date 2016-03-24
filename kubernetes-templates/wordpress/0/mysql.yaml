@@ -35,7 +35,7 @@ spec:
       # we're alive when the socket opens
       livenessProbe:
         tcpSocket:
-          port: "mysql"
+          port: 3306
         initialDelaySeconds: 5
         timeoutSeconds: 1
       # this may leak the password to logs
