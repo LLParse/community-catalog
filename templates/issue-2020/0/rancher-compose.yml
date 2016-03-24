@@ -1,0 +1,8 @@
+.catalog:
+  name: test issue 2020
+  version: 0.1
+  description: |
+    Issue 2020 test
+  minimum_rancher_version: v1.0.0-rc2
+test:
+  scale: 3

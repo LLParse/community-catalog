@@ -1,0 +1,6 @@
+name: Issue 2020
+description: |
+  Test issue 2020
+version: 0.1
+category: testing
+minimum_rancher_version: v1.0.0-rc2
