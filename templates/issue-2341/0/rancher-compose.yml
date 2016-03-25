@@ -1,0 +1,5 @@
+.catalog:
+  name: Issue 2341
+  version: "0.1"
+  description: Testing Issue 2341
+  minimum_rancher_version: v1.0.0-rc3
