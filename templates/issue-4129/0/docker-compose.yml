@@ -1,0 +1,20 @@
+linked:
+  image: busybox
+  name: 
+  labels:
+    io.rancher.sidekicks: sidekicklinker,sleepysidekicklinker
+  command: "sh -ex -c 'sleep 100000'"
+sidekicklinker:
+  image: busybox
+  links:
+    - linked:lookitup
+  labels:
+    io.rancher.container.start_once: 'true'
+  command: "sh -ex -c 'nslookup lookitup && sleep 100000'"
+sleepysidekicklinker:
+  image: busybox
+  links:
+    - linked:lookitup
+  labels:
+    io.rancher.container.start_once: 'true'
+  command: "sh -ex -c 'sleep 10 && nslookup lookitup && sleep 100000'"
