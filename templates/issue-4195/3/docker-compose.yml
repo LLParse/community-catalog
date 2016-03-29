@@ -1,0 +1,18 @@
+linked:
+  image: busybox
+  name: 
+  command: "sh -ex -c 'sleep 100000'"
+linker:
+  image: busybox
+  links:
+    - linked:lookitup
+  labels:
+    io.rancher.container.start_once: 'true'
+  command: "sh -ex -c 'nslookup lookitup && sleep 100000'"
+sleepylinker:
+  image: busybox
+  links:
+    - linked:lookitup
+  labels:
+    io.rancher.container.start_once: 'true'
+  command: "sh -ex -c 'sleep 10 && nslookup lookitup && sleep 100000'"
