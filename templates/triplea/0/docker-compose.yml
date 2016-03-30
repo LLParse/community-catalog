@@ -1,0 +1,13 @@
+triplea:
+  image: llparse/triplea:v1
+  environment:
+  - NAME=${NAME}
+  - EMAIL=${EMAIL}
+  - PORT=${PORT}
+  - MAX_HEAP=256m
+  ports:
+  - "${PORT}:${PORT}"
+  labels:
+    # we need dynamic port reservations
+    io.rancher.scheduler.affinity:container_label_ne: triplea=${PORT}
+    triplea: ${PORT}
