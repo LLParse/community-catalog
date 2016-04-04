@@ -1,0 +1,7 @@
+orchestrate:
+  image: llparse/openstack-orchestrate
+  command: sleep 1000000
+  name: orchestrate
+  net: host
+  volumes:
+  - /var/run/docker.sock:/var/run/docker.sock

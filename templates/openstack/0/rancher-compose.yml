@@ -1,0 +1,6 @@
+.catalog:
+  name: OpenStack
+  version: 2.0.0-rancher1
+  description: |
+    Open source software for creating private and public clouds
+  minimum_rancher_version: v1.0.0
