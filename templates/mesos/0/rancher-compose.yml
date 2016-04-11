@@ -1,0 +1,16 @@
+.catalog:
+  name: Mesos
+  questions:
+  - variable: VERSION
+    label: Mesos Version
+    description: Select the version of Mesos to run.
+    required: true
+    type: enum
+    default: 0.24.1-centos-7
+    options:
+    - latest
+    - 0.24.1
+    - 0.24.1-centos
+    - 0.24.1-centos-7
+    - 0.24.1-ubuntu
+    - 0.24.1-ubuntu-14.04

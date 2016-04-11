@@ -1,0 +1,6 @@
+mesos-master:
+  image: mesoscloud/mesos-master:${VERSION}
+mesos-slave:
+  image: mesoscloud/mesos-slave:${VERSION}
+marathon:
+  image: mesoscloud/marathon:${VERSION}
