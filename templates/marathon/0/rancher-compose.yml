@@ -1,0 +1,8 @@
+.config:
+  name: Marathon
+  version: v1
+  description: |
+    A container orchestration platform for Mesos and DCOS
+  questions:
+marathon:
+  scale: 1
