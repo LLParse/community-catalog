@@ -1,6 +1,6 @@
 .catalog:
   name: "Etcd"
-  version: "2.3.3-rancher1"
+  version: "2.3.6-rancher1"
   description: |
     Distributed highly-available key-value store
   minimum_rancher_version: "v0.46.0"
@@ -14,3 +14,10 @@
 etcd:
   retain_ip: true
   scale: ${REPLICAS}
+  health_check:
+    port: 2379
+    interval: 7500
+    unhealthy_threshold: 2
+    request_line: '/health'
+    healthy_threshold: 2
+    response_timeout: 5000
