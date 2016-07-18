@@ -1,41 +1,38 @@
 # Etcd 
 
-A distributed, highly-available key/value store written in Go.
+A distributed, highly-available key/value store for storing configuration information.
 
-### Info
+### General
 
- This creates an N-node etcd cluster on top of Rancher. The bootstrap process is performed using a standalone etcd discovery node. Upon the cluster entering a running state, this discovery service will shutdown. The state of the etcd cluster is a key/value pair stored on etcd itself, in a hidden key at location `/_state`.
+This template attempts to create an N-node Etcd cluster. Only 1 node is allowed per host. If not enough hosts are available, the largest cluster possible will be built with the resources available. Adding more hosts at a later date will result in the cluster scaling up to the maximum desired size.
 
-Etcd node restarts and upgrades are fully supported. Please only restart/upgrade `floor(N/2)` nodes at one time in order to maintain service stability. Restarting or upgrading all nodes at once will cause service downtime, but the volume containerization should prevent data loss. While this template can survive `floor(N/2)` node/data volume failures while maintaining service uptime, manual intervention may be required in the face of a corrupted data volume.
+### Upgrades
 
-Scaling up an existing etcd cluster is fully automated using the [Etcd Members API](https://coreos.com/etcd/docs/2.3.0/members_api.html).
+Starting with `2.3.6-rancher4`, upgrades are fully supported and require no user intervention beyond navigating the UI and selecting the desired version. In a standalone deployment, service downtime is inevitable. In a 3-node deployment, service downtime may be experienced as quorum is lost for a brief period of time. This is a limitation of the template and will be addressed in future versions. 5+ node upgrades should see no downtime.
 
-Scaling down is unsupported..
+### Resiliency
 
+Etcd can survive `floor(N/2)` recoverable or unrecoverable failures while maintaining 100% uptime. For recoverable host failures such as a power cycle, the service self-heals. For unrecoverable host failures, the service self-heals when sufficient resources are allocated to the environment. Therefore, it is not a bad idea to allocate an extra host beyond the specified cluster size. For instance, a 3-node deployment in a 4-host environment may survive 2 host failures, given enough time in-between to self-heal the cluster. The amount of time which must pass between host failures is indeterminate and depends on how much data must be replicated to the new node.
 
-### Usage
+Etcd can survive `N` recoverable failures, but system downtime will be experienced once a majority of nodes (quorum) is lost.
 
-Select etcd the catalog page.
+Etcd can survive `N-1` unrecoverable failures, but will enter a disaster state where some user intervention is required to recover. Recovering from this situation is mostly-automated, but will not be fully automated. This is a very, very bad situation to be in and should never occur if appropriate steps are taken such as spreading hosts across availability zones.
 
-Fill in the number of nodes desired. This should be an **ODD** number. Recommended configurations are 3, 5, or 7 node deployments. More nodes increases read availability while decreasing read latency. Less nodes decreases write latency, but sacrifices read latency and availability.
+### Disaster Recovery (DR)
 
-Click deploy.
+If a majority of nodes are unrecoverably lost, you must re-build the cluster from one of the surviving nodes. The process involves selecting a survivor, transforming it into a standalone node, and adding new hosts so the service may scale back up to the desired size.
 
-Once the stack is deployed and assuming your application is deployed within it, you can access the etcd cluster in your application like so:
+In more detail, follow these steps:
 
-```
-etcdctl --endpoints http://etcd:2379 member list
-```
+1. Determine if your lost hosts/containers are truly unrecoverable. If a host comes back online, wait at least 5 minutes while Network Agent repairs itself and the Etcd container should return to a running state. If the hosts are truly unrecoverable, remove them from the environment.
+2. Find a surviving container that is still in running state (green circle). From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will backup the data directory to a special location within the container. Click `Close` to exit the shell.
+3. From the dropdown menu of the same container, click `Restart`. This will trigger the disaster recovery automation which will sanitize the data directory, update cluster membership to reflect a new standalone deployment, and start the node. At this point, Etcd will begin servicing requests and downstream containers should return to a functional state.
+4. In the event you experienced a majority of hosts failing simultaneously but had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster. If you did not have a surplus of hosts, add new ones and etcd will scale up to the desired size.
 
-On the etcd cluster itself, ETCDCTL_ENDPOINT environment variable is set so you may inspect like so:
+It is highly unlikely that you will ever need to perform these steps. If you've truly experienced a disaster scenario (and you didn't cause it), your infrastructure provider should be assessed for instability. If in the cloud, consider switching providers.
 
-```
-etcdctl member list
-```
-
-It is always possible that DNS will return an IP address for an etcd node that is dying. Your application should ensure connection retry logic exists when it uses etcd, or alternatively provide 2+ endpoints using IP addresses to ensure high availability.
- 
 ### Changelog
 
-* Fixed upgrade strategy to automatically shutdown discovery containers
-* Refactor entrypoint script to use `giddyup` and `etcdctl`
+* Begin servicing requests as soon as the first container enters running state
+* Solve the metadata race condition
+* Make disaster recovery possible

@@ -1,22 +1,28 @@
 .catalog:
-  name: "Etcd"
-  version: "2.3.6-rancher1"
-  description: |
-    Distributed highly-available key-value store
-  minimum_rancher_version: "v0.46.0"
+  version: 2.3.6-rancher4
+  minimum_rancher_version: v1.1.1
   questions:
-    - variable: "REPLICAS"
-      description: "Number of Etcd nodes. 3, 5, or 7 are good choices"
-      label: "Number of Nodes:"
-      required: true
-      default: 3
-      type: "int"
+  - variable: SCALE
+    description: Desired cluster size. 3, 5, or 7 are good choices. You will need this many hosts to reach your desired scale.
+    label: Number of Nodes
+    required: true
+    default: 3
+    type: int
+  - variable: DEBUG
+    description: Enable or disable verbose logging and other debugging features
+    label: Debug
+    required: true
+    default: true
+    type: boolean
 etcd:
-  scale: ${REPLICAS}
+  retain_ip: true
+  scale_policy:
+    min: 1
+    max: ${SCALE}
+    increment: 1
   health_check:
     port: 2379
-    interval: 7500
+    interval: 5000
+    response_timeout: 3000
     unhealthy_threshold: 2
-    request_line: '/health'
     healthy_threshold: 2
-    response_timeout: 5000
