@@ -1,14 +1,14 @@
 # Etcd 
 
-A distributed, highly-available key/value store for storing configuration information.
+A distributed key/value store that provides a reliable way to store data across a cluster of machines
 
 ### General
 
-This template attempts to create an N-node Etcd cluster. Only 1 node is allowed per host. If not enough hosts are available, the largest cluster possible will be built with the resources available. Adding more hosts at a later date will result in the cluster scaling up to the maximum desired size.
+The template deploys an N-node cluster. Only 1 node is allowed per host. If less than N hosts are available, the largest cluster possible will be built with the resources available. Adding more hosts at a later date will result in the cluster scaling up to the maximum desired size.
 
 ### Upgrades
 
-Starting with `2.3.6-rancher4`, upgrades are fully supported and require no user intervention beyond navigating the UI and selecting the desired version. In a standalone deployment, service downtime is inevitable. In a 3-node deployment, service downtime may be experienced as quorum is lost for a brief period of time. This is a limitation of the template and will be addressed in future versions. 5+ node upgrades should see no downtime.
+Starting with `2.3.6-rancher4`, upgrades are fully supported and require no user intervention beyond navigating the UI and selecting the desired version.
 
 ### Resiliency
 
@@ -24,12 +24,16 @@ If a majority of nodes are unrecoverably lost, you must re-build the cluster fro
 
 In more detail, follow these steps:
 
-1. Determine if your lost hosts/containers are truly unrecoverable. If a host comes back online, wait at least 5 minutes while Network Agent repairs itself and the Etcd container should return to a running state. If the hosts are truly unrecoverable, remove them from the environment.
-2. Find a surviving container that is still in running state (green circle). From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will backup the data directory to a special location within the container. Click `Close` to exit the shell.
+1. Determine if your lost hosts are truly unrecoverable. If on bare metal, this involves fixing or replacing hardware and rebooting. If in the cloud, check if the host was stopped and attempt to start it. If a host comes back online, wait at least 5 minutes to allow Network Agent to repair itself. You can figure out if the network is repaired by following [these steps](http://docs.rancher.com/rancher/latest/en/faqs/troubleshooting/#containers-on-hosts-unable-to-ping-each-other-how-to-check-that-the-hosts-can-ping-each-other) for the recovered host. If recovery fails, remove the dead hosts from the environment.
+2. Find 1 surviving container. Survivors will be in running state (green circle on the UI). These containers are DR candidates. From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will backup the data directory to a special location within the container. Click `Close` to exit the shell.
 3. From the dropdown menu of the same container, click `Restart`. This will trigger the disaster recovery automation which will sanitize the data directory, update cluster membership to reflect a new standalone deployment, and start the node. At this point, Etcd will begin servicing requests and downstream containers should return to a functional state.
-4. In the event you experienced a majority of hosts failing simultaneously but had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster. If you did not have a surplus of hosts, add new ones and etcd will scale up to the desired size.
+4. In the unlikely event you experienced a majority of hosts failing simultaneously and had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster. If you did not have a surplus of hosts, add new ones and etcd will scale up to the desired size.
 
-It is highly unlikely that you will ever need to perform these steps. If you've truly experienced a disaster scenario (and you didn't cause it), your infrastructure provider should be assessed for instability. If in the cloud, consider switching providers.
+It is highly unlikely that you will ever need to perform these steps. If you've truly experienced a disaster scenario (and you didn't cause it), your infrastructure provider should be assessed for instability.
+
+### Limitations
+
+For upgrades, service downtime is inevitable for standalone deployments. In a 3-node deployment, service downtime may be experienced as quorum is lost for a brief period of time. This is a limitation of the template and will be addressed in future versions. 5+ node upgrades should see no downtime.
 
 ### Changelog
 
