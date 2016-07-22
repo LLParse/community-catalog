@@ -25,18 +25,15 @@ If a majority of nodes are unrecoverably lost, you must re-build the cluster fro
 In more detail, follow these steps:
 
 1. Determine if your lost hosts are truly unrecoverable. If on bare metal, this involves fixing or replacing hardware and rebooting. If in the cloud, check if the host was stopped and attempt to start it. If a host comes back online, wait at least 5 minutes to allow Network Agent to repair itself. You can figure out if the network is repaired by following [these steps](http://docs.rancher.com/rancher/latest/en/faqs/troubleshooting/#containers-on-hosts-unable-to-ping-each-other-how-to-check-that-the-hosts-can-ping-each-other) for the recovered host. If recovery fails, remove the dead hosts from the environment.
-2. Find 1 surviving container. Survivors will be in running state (green circle on the UI). These containers are DR candidates. From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will backup the data directory to a special location within the container. Click `Close` to exit the shell.
-3. From the dropdown menu of the same container, click `Restart`. This will trigger the disaster recovery automation which will sanitize the data directory, update cluster membership to reflect a new standalone deployment, and start the node. At this point, Etcd will begin servicing requests and downstream containers should return to a functional state.
-4. In the unlikely event you experienced a majority of hosts failing simultaneously and had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster. If you did not have a surplus of hosts, add new ones and etcd will scale up to the desired size.
-
-It is highly unlikely that you will ever need to perform these steps. If you've truly experienced a disaster scenario (and you didn't cause it), your infrastructure provider should be assessed for instability.
+2. Find 1 surviving container. Survivors will be in running state (green circle on the UI). These containers are DR candidates. From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will automatically restart the container in disaster recovery mode. Once the recovery process completes, etcd will begin servicing requests and downstream containers should return to a functional state.
+4. Add more hosts so your etcd service may scale up to the desired size. In the unlikely event you experienced a majority of hosts failing simultaneously and had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster.
 
 ### Limitations
 
-For upgrades, service downtime is inevitable for standalone deployments. In a 3-node deployment, service downtime may be experienced as quorum is lost for a brief period of time. This is a limitation of the template and will be addressed in future versions. 5+ node upgrades should see no downtime.
+For 3+ node deployments in environments using etcd heavily, it is theoretically possible (but improbable) for etcd to temporarily lose quorum during upgrade. The next template will make use of new features available in etcd v3.0.0 that expose the raft index to clients, thereby making it possible to deduce if an upgraded node has caught up with the rest of the cluster. This will deprecate the use of non-deterministic waiting periods.
 
 ### Changelog
 
-* Begin servicing requests as soon as the first container enters running state
-* Solve the metadata race condition
-* Make disaster recovery possible
+* Upgrade to etcd v2.3.7
+* Re-work DR script to automate restart of container and perform backup only after etcd termination
+* Proxy health check and add a waiting period before reporting healthy, preventing upgrades from losing quorum in most cases
