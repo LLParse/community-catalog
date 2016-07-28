@@ -26,7 +26,7 @@ In more detail, follow these steps:
 
 1. Determine if your lost hosts are truly unrecoverable. If on bare metal, this involves fixing or replacing hardware and rebooting. If in the cloud, check if the host was stopped and attempt to start it. If a host comes back online, wait at least 5 minutes to allow Network Agent to repair itself. You can figure out if the network is repaired by following [these steps](http://docs.rancher.com/rancher/latest/en/faqs/troubleshooting/#containers-on-hosts-unable-to-ping-each-other-how-to-check-that-the-hosts-can-ping-each-other) for the recovered host. If recovery fails, remove the dead hosts from the environment.
 2. Find 1 surviving container. Survivors will be in running state (green circle on the UI). These containers are DR candidates. From the dropdown menu, select `Execute Shell`. Type `disaster` and hit enter. The script will automatically restart the container in disaster recovery mode. Once the recovery process completes, etcd will begin servicing requests and downstream containers should return to a functional state.
-4. Add more hosts so your etcd service may scale up to the desired size. In the unlikely event you experienced a majority of hosts failing simultaneously and had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait patiently and they will automatically join the cluster.
+3. Add more hosts so your etcd service may scale up to the desired size. In the unlikely event you experienced a majority of hosts failing simultaneously and had a surplus of hosts, you will have unhealthy Etcd containers scheduled to other hosts. Wait for 5 minutes for these containers to become healthy. If after 5 minutes they are still initializing, restart them.
 
 ### Limitations
 
