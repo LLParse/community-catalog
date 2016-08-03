@@ -1,22 +1,12 @@
 etcd:
-  image: rancher/etcd:v2.3.7-3
+  image: rancher/etcd:v2.3.7-6
   labels:
     io.rancher.scheduler.affinity:container_label_ne: io.rancher.stack_service.name=$${stack_name}/$${service_name}
-    io.rancher.sidekicks: etcd-hc,data
+    io.rancher.sidekicks: data
   environment:
     RANCHER_DEBUG: '${DEBUG}'
   volumes_from:
   - data
-
-etcd-hc:
-  image: rancher/etcd:v2.3.7-3
-  environment:
-    RANCHER_DEBUG: '${DEBUG}'
-  entrypoint: /usr/bin/etcdhc
-  command: proxy --port=:2378 --wait=60s
-  links:
-  - etcd
-  net: container:etcd
 
 data:
   image: busybox

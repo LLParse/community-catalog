@@ -9,7 +9,7 @@
     default: 3
     type: int
   - variable: DEBUG
-    description: Enable or disable verbose logging and other debugging features
+    description: Enable or disable verbose logging
     label: Debug
     required: true
     default: true
