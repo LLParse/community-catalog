@@ -15,10 +15,3 @@
     - 7
     - 9
 swarmkit-mon:
-  health_check:
-    request_line: GET /ping HTTP/1.0
-    port: 2378
-    interval: 15000
-    response_timeout: 10000
-    healthy_threshold: 1
-    unhealthy_threshold: 2
